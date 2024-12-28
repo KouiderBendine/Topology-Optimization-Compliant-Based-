@@ -1,0 +1,135 @@
+FINISH
+/CLEAR
+/title,  Smart Morphing Wing-  K.Bendine
+/RGB,INDEX,100,100,100,0
+/RGB,INDEX,0,0,0,15
+/CWD,'D:\MorphingWings\AnsysMorphing_Wing\Optimization_morphingForce'
+
+/PREP7
+*Use,parametreOptimization.inp
+! Step 1: Define Material Properties for TPU
+MP, EX, 1, 25E9                ! Young’s Modulus (50 MPa)
+MP, PRXY, 1, 0.28              ! Poisson's Ratio (0.48)
+MP, DENS, 1, 1500              ! Density (1200 kg/m^3)
+
+! Hyperelastic TPU (Mooney-Rivlin)
+!TB, HYPER, 1, , MOONEY         ! Begin definition of hyperelastic material
+!TBDATA, 1, 0.5E6, 0.1E6       ! Mooney-Rivlin constants C10 = 0.5 MPa, C01 = 0.1 MPa
+
+! Step 2: Define Section for BEAM188 (assuming a rectangular cross-section)
+SECTYPE, 1, BEAM, RECT         ! Define the beam section (rectangular)
+SECDATA, 0.01, 0.01           ! Rectangular cross-section (width = 10mm, height = 5mm)
+
+! Step 3: Define Upper Surface Coordinates (X, Y) of NACA 0024 Profile
+*DIM, XCOORD, ARRAY, 18        ! X-coordinates from provided data
+*DIM, YU, ARRAY, 18            ! Upper surface Y-coordinates from provided data
+*DIM, YL, ARRAY, 18            ! Lower surface Y-coordinates (symmetric)
+
+! Assign provided X and Y coordinates for the upper surface
+XCOORD(1) = 1.000, 0.950, 0.900, 0.800, 0.700, 0.600, 0.500, 0.400, 0.300, 0.250, 0.200, 0.150, 0.100, 0.075, 0.050, 0.025, 0.0125, 0.000
+YU(1)    = 0.00252, 0.01613, 0.02896, 0.05247, 0.07328, 0.09127, 0.10588, 0.11607, 0.12004, 0.11883, 0.11475, 0.10691, 0.09365, 0.08400, 0.07109, 0.05229, 0.03788, 0.00000
+
+! Scale factor
+SCALE = 0.4
+
+! Step 4: Compute the lower surface Y-coordinates and scale
+*DO,I,1,18
+  XCOORD(I) = XCOORD(I) * SCALE  ! Scale X-coordinates
+  YU(I) = YU(I) * SCALE            ! Scale upper surface Y-coordinates
+  YL(I) = -YU(I)                   ! Compute lower surface Y-coordinates (symmetric)
+*ENDDO
+
+! Step 5: Create Keypoints for the Upper and Lower Surfaces of the Profile
+*DO,I,1,18
+  K,I,XCOORD(I),,YU(I)   ! Upper surface keypoints (keypoints 1 to 18)
+  K,I+18,XCOORD(I),,YL(I) ! Lower surface keypoints (keypoints 19 to 36)
+*ENDDO
+
+*GET,NoKPs,KP,0,NUM,MAX
+
+K,NoKPs+1,XCOORD(8),,YL(8)+0.03
+K,NoKPs+2,XCOORD(7),,YL(7)+0.03
+K,NoKPs+3,XCOORD(8)+0.010,,YL(8)
+K,NoKPs+4,XCOORD(7)-0.010,,YL(7)
+
+! Step 5: Create Lines Connecting Keypoints to Form Airfoil Shape
+*DO,I,1,17
+  L,I,I+1                ! Create lines for upper surface
+  
+*ENDDO
+
+*DO,I,1,6
+L,I+18,I+19            ! Create lines for lower surface
+*ENDDO
+
+!L,25,38
+L,25,40
+L,38,37
+!L,37,26
+L,39,26
+
+
+*DO,I,8,17
+L,I+18,I+19            ! Create lines for lower surface
+*ENDDO
+
+allsel,all
+!NUMMRG,KP, , , ,LOW
+
+L,1,19
+
+! Step 7: Assign Material and Section to BEAM188 Elements
+MAT, 1                     ! Assign TPU material
+SECNUM, 1                  ! Assign the rectangular section
+
+! Step 6: Meshing the Profile Using BEAM188 Elements
+ET,1,188                   ! Define BEAM188 element
+LMESH,ALL                  ! Mesh the lines using BEAM188
+
+
+
+
+
+
+ allsel,all 
+
+
+! Step 8: Boundary Conditions and Loads
+Lsel,s,Line,,9,17
+Lsel,a,Line,,26,36
+DL, all, , all                ! Fix the first keypoint (example fixed constraint)
+
+DK,38, ,0, ,0,ALL, , , , , ,  
+DK,37, ,0, ,0,ALL, , , , , ,  
+
+NoNodesForce1=23
+NoNodesForce2=7
+lsel,s,line,,1,13,2
+nsll,s
+!SFBEAM, all, , pres, 500
+!sf,all,pres,1000
+
+allsel,all
+/UNITS,DEG
+F,90,FX,-50
+!F,83,FZ,-50*cos(30)
+
+
+F,Loc1,FX,F1*cos(Teta1)              ! Apply force on the last keypoint (example load)
+F,Loc1,FZ,F1*sin(Teta1)              ! Apply force on the last keypoint (example load)
+
+F,Loc2,FX,F2*cos(Teta2)            ! Apply force on the last keypoint (example load)
+F,Loc2,FZ,F2*sin(Teta2)             ! Apply force on the last keypoint (example load)
+
+F,Loc3,FX,F3*cos(Teta3)            ! Apply force on the last keypoint (example load)
+F,Loc3,FZ,F3*sin(Teta3)             ! Apply force on the last keypoint (example load)
+
+!F,NoNodesForce2,FX,-1              ! Apply force on the last keypoint (example load)
+!F,NoNodesForce2,FY,-1              ! Apply force on the last keypoint (example load)
+
+! Step 9: Solve the Model
+! Step 10: Solve the Model
+FINISH
+
+
+*use,ProcessSquar.mac

@@ -1,0 +1,63 @@
+! Step 12: Extract Y-direction Displacement for Keypoints 1-8 and 19-26
+*DIM, YDISP_UP, ARRAY, 8      ! Array to store Y-displacement for upper surface keypoints (1 to 8)
+*DIM, XDISP_UP, ARRAY, 8      ! Array to store Y-displacement for upper surface keypoints (1 to 8)
+*DIM, YDISP_LOW, ARRAY, 8     ! Array to store Y-displacement for lower surface keypoints (19 to 26)
+*DIM, XDISP_LOW, ARRAY, 8     ! Array to store Y-displacement for lower surface keypoints (19 to 26)
+*DIM,x_coordLow,ARRAY, 8
+*DIM,y_coordLow,ARRAY, 8
+*DIM,x_coordUP,ARRAY, 8
+*DIM,y_coordUP,ARRAY, 8
+
+/SOLU
+Antype,static
+allsel,all
+KBC,1
+OUTPR,,ALL
+SOLVE
+! Step 11: Post-Processing
+/POST1
+SET,LAST
+!PLDISP,1                   ! Plot the deformed shape
+!FINISH
+!*CFOPEN,strcat(chrval(1),'Deformed'),txt,' '
+
+*CFOPEN,AnsysDeformed,txt,' '
+
+! Store displacements for keypoints 1 to 8
+*DO, I, 1, 7
+   ksel,s,kp,,I
+   NSLK, s,1
+  
+   *GET,NoNodes,NODE,0,NUM,MAX 
+   *GET, x_coordUP(I), NODE, NoNodes, LOC, X
+   *GET, y_coordUP(I), NODE, NoNodes, LOC, z
+  *get,YDISP_UP(I), NODE, NoNodes,U, z
+  *get,XDISP_UP(I), NODE, NoNodes,U, X
+ allsel,all 
+*ENDDO
+
+! Store displacements for keypoints 19 to 26
+*DO, I, 1, 7
+   ksel,s,kp,,I+18
+   NSLK, s
+   *GET,NoNodes,NODE,0,NUM,MAX 
+   *GET, x_coordLow(I), NODE, NoNodes, LOC, X
+   *GET, y_coordLow(I), NODE, NoNodes, LOC, z
+   *GET,YDISP_LOW(I), NODE, NoNodes,U, z
+   *GET,XDISP_LOW(I), NODE, NoNodes,U, X
+ allsel,all
+*ENDDO
+
+! Print Y-displacement results to the console
+*DO, I, 1, 7
+
+*VWRITE, (x_coordUP(I)+XDISP_UP(I)),(x_coordLow(I)+XDISP_LOW(I)),(y_coordUP(I)+YDISP_UP(I)),(y_coordLow(I)+YDISP_LOW(I))
+%0.0f,%0.0f,%0.0f,%0.0f
+ 
+*ENDDO
+*cfclos
+PLDISP,1                   ! Plot the deformed shape
+FINISH
+!(%0.0f,%0.0f,%0.0f,%0.0f) 
+!*VWRITE, XDISP_UP(1),XDISP_LOW(1),YDISP_UP(1),YDISP_LOW(1)
+%0.0f,%0.0f,%0.0f,%0.0f
