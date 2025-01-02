@@ -1,0 +1,26 @@
+LOAD NACA0024.dat
+NACA0024
+GDES
+flap
+0.45
+0.00
+5
+exec
+
+PPAR
+
+
+PSAV 5Airfoil.txt
+
+PANE
+OPER
+Visc 1000000
+m 0.15
+PACC
+5polar_file.txt
+
+ITER 100
+ASeq -10 20 2
+
+
+quit
