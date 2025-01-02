@@ -99,7 +99,7 @@ S1 = [
 figure(1);
 plot(10 * S, S1, 'b*-', 'DisplayName', 'Experiment');
 hold on;
-plot(ValY(:, 1), ValY(:, 2), 'ro-', 'DisplayName', 'Numerical Model');
+plot(ValY(:, 1), ValY(:, 2), 'r-', 'DisplayName', 'Numerical Model');
 ylabel('Y Deflection [mm]', 'FontSize', 20);
 xlabel('Steps', 'FontSize', 20);
 legend;
@@ -109,7 +109,7 @@ hold off;
 figure(2);
 plot(ValEPY(:, 1), ValEPY(:, 2), 'b*-','DisplayName', 'Experiment');
 hold on;
-plot( ValX(:, 1), ValX(:, 2), 'ro-', 'DisplayName', 'Numerical Model');
+plot( ValX(:, 1), ValX(:, 2), 'r-', 'DisplayName', 'Numerical Model');
 
 ylabel('X Deflection [mm]', 'FontSize', 20);
 xlabel('Steps', 'FontSize', 20);
